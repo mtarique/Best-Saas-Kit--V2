@@ -1,17 +1,47 @@
-// Admin configuration - Add admin emails here
-export const ADMIN_EMAILS = [
-  'zainulabedeen0002@gmail.com',
-  'zain@bestsaaskit.com',
-  '42023640+zainulabedeen123@users.noreply.github.com', // Your GitHub email
-  // Add more admin emails as needed
-] as const;
+// Admin configuration - Load from environment variables
+// Set ADMIN_EMAILS in .env.local as comma-separated list:
+// ADMIN_EMAILS=email1@example.com,email2@example.com,email3@example.com
+const getAdminEmailsFromEnv = (): string[] => {
+  const envEmails = process.env.ADMIN_EMAILS;
+  
+  if (!envEmails) {
+    console.warn('[Admin Config] ADMIN_EMAILS not set in environment variables. Using fallback.');
+    // Fallback to empty array - you must set ADMIN_EMAILS in .env.local
+    return [];
+  }
+  
+  // Split by comma and clean up
+  return envEmails
+    .split(',')
+    .map(email => email.trim())
+    .filter(email => email.length > 0);
+};
 
-export type AdminEmail = typeof ADMIN_EMAILS[number];
+export const ADMIN_EMAILS = getAdminEmailsFromEnv();
+
+export type AdminEmail = string;
 
 // Check if an email is an admin email
 export function isAdminEmail(email: string | null | undefined): boolean {
   if (!email) return false;
-  return ADMIN_EMAILS.includes(email as AdminEmail);
+  // Compare emails case-insensitively
+  const normalizedEmail = email.toLowerCase().trim();
+  const isAdmin = ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === normalizedEmail);
+  
+  // Debug logging
+  if (!isAdmin) {
+    console.log("[Admin Config] Email check failed:");
+    console.log("  - Input email:", email);
+    console.log("  - Normalized:", normalizedEmail);
+    console.log("  - Admin emails:", ADMIN_EMAILS);
+    console.log("  - Comparisons:", ADMIN_EMAILS.map(ae => ({
+      original: ae,
+      normalized: ae.toLowerCase(),
+      matches: ae.toLowerCase() === normalizedEmail
+    })));
+  }
+  
+  return isAdmin;
 }
 
 // Admin permissions

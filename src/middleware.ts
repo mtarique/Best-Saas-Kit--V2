@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth"
 
 export default auth((req) => {
   // Define protected routes
-  const protectedPaths = ['/dashboard', '/api/chat', '/api/usage', '/api/test-ai']
+  const protectedPaths = ['/dashboard', '/api/chat', '/api/usage', '/api/test-ai', '/admin', '/api/admin']
   const isProtectedPath = protectedPaths.some(path =>
     req.nextUrl.pathname.startsWith(path)
   )
@@ -10,6 +10,10 @@ export default auth((req) => {
   // Allow access to protected routes only if user has a session
   if (isProtectedPath && !req.auth) {
     const newUrl = new URL('/auth/signin', req.nextUrl.origin)
+    // Preserve the original URL for redirect after signin
+    if (req.nextUrl.pathname.startsWith('/admin')) {
+      newUrl.searchParams.set('callbackUrl', req.nextUrl.pathname)
+    }
     return Response.redirect(newUrl)
   }
 })

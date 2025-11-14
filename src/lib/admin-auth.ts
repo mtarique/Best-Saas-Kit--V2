@@ -25,10 +25,17 @@ export async function requireAdminAccess() {
     redirect("/auth/signin?callbackUrl=/admin");
   }
   
+  // Debug logging to help identify the issue
+  console.log("[Admin Auth] Checking admin access for email:", session.user.email);
+  console.log("[Admin Auth] Email type:", typeof session.user.email);
+  console.log("[Admin Auth] Email value:", JSON.stringify(session.user.email));
+  
   if (!isAdminEmail(session.user.email)) {
+    console.log("[Admin Auth] Email not found in admin list. Redirecting to dashboard.");
     redirect("/dashboard?error=unauthorized");
   }
   
+  console.log("[Admin Auth] Admin access granted for:", session.user.email);
   return session.user;
 }
 
